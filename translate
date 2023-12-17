@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+TEXT=""
+if (( ${#} == 0 )); then
+  TEXT=$(cat < /dev/stdin | tr '\n' ' ')
+else
+  TEXT="$@"
+fi
+
+TASK="You will be provided with one or more sentences in either English or German. If the sentences are in German then your task is to translate it into English. If the sentences are in English then your task is to tranlate it into German."
+MODEL="gpt-3.5-turbo-16k"
+BODY="{\"model\":\"${MODEL}\",\"messages\":[{\"role\":\"system\",\"content\":\"${TASK}\"},{\"role\":\"user\",\"content\":\"${TEXT}\"}]}"
+
+curl https://api.openai.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $CHATGPT_API_KEY" \
+  -d "${BODY}" \
+  -s | jq -r '.choices[].message.content'
